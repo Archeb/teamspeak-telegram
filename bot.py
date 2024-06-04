@@ -1,12 +1,4 @@
-from operator import truediv
-import os
-import time
-import json
-import random
 import config
-import requests
-import traceback
-import azure.cognitiveservices.speech as speechsdk
 
 from TelegramConnection import TelegramConnection
 from TSConnection import TSConnection
@@ -14,12 +6,6 @@ from TSConnection import TSConnection
 TYPE = 0
 FROM = 1
 TEXT = 3
-
-speech_config = speechsdk.SpeechConfig(**config.speech_config)
-synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=None)
-last_speech_time = 0
-audiobot_api = config.audiobot_config["api"]
-audiobot_auth_header = config.audiobot_config["auth_header"]
 
 telegram = TelegramConnection(**config.telegram_config)
 telegram.run()
@@ -52,22 +38,6 @@ def build_message(event):
         return None
 
 
-def get_ssml(text):
-    available_voice = ['XiaoxuanNeural', 'XiaomoNeural']
-    ssml_string = """<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis"
-        xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">
-        <voice name="zh-CN-{0}">
-            <mstts:silence type="Sentenceboundary" value="1000ms"/>
-            <mstts:express-as role="Girl" style="disgruntled">
-                <prosody pitch="high" rate="1.1">
-                    {1}
-                </prosody>
-            </mstts:express-as>
-        </voice>
-    </speak>"""
-    return ssml_string.format(random.choice(available_voice), text)
-
-
 while telegram.running() and ts.running():
 
     try:
@@ -95,31 +65,12 @@ while telegram.running() and ts.running():
 
                 ts.relay_global_message(
                     "(" + im[2] + ")", "<%s> %s" % (im[FROM], im[TEXT]))
-
-                if len(im[TEXT]) < 51:
-                    speech_result = synthesizer.speak_ssml_async(
-                        get_ssml(im[TEXT])).get()
-                    speech_stream = speechsdk.AudioDataStream(speech_result)
-                    speech_filename = os.getcwd() + "\\speechtemp\\" + \
-                        str(int(round(time.time() * 1000))) + ".wav"
-                    speech_stream.save_to_wav_file(speech_filename)
-                    time.sleep(0.5)
-                    try:
-                        print(requests.get(audiobot_api + "/bot/use/0/(/json/merge/(/play/%s)/(/whisper/all))" %
-                              (requests.utils.quote(speech_filename),), headers=audiobot_auth_header, timeout=1).text)
-                    except:
-                        print(traceback.format_exc())
-                        last_speech_time = int(time.time())
-                else:
-                    #telegram.send_text("This passage exceeds 50 words limitation and will not be broadcast")
-                    telegram.send_text("这段话超过50字，将不会有语音广播")
         if tm:
             if (tm[TYPE] == "MSG"):
                 telegram.relay_message(tm[FROM], tm[TEXT])
             else:
                 telegram.relay_message("服务器消息", build_message(tm))
 
-        # time.sleep(0.1)
     except KeyboardInterrupt:
         telegram.disconnect()
         ts.disconnect()

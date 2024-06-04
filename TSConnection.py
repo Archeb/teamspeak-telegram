@@ -57,7 +57,7 @@ class TSConnection:
                 self._socket.send(
                     bytes("servernotifyregister event=channel id=1\n", 'UTF-8'))
 
-            time.sleep(1)
+            time.sleep(1000)
 
     def connect(self):
         print("[TS] Connecting...")
