@@ -1,4 +1,3 @@
-from pydoc import cli
 import socket
 import threading
 import time
@@ -57,7 +56,7 @@ class TSConnection:
                 self._socket.send(
                     bytes("servernotifyregister event=channel id=1\n", 'UTF-8'))
 
-            time.sleep(1000)
+            time.sleep(5)
 
     def connect(self):
         print("[TS] Connecting...")
@@ -80,6 +79,7 @@ class TSConnection:
                 bytes("servernotifyregister event=server id=1\n", 'UTF-8'))
             self._socket.send(
                 bytes("clientupdate client_nickname=%s\n" % self._nick, 'UTF-8'))
+            time.sleep(1)
             self._socket.send(
                 bytes("clientlist\n", 'UTF-8'))
             print("[TS] Connected")
@@ -109,7 +109,7 @@ class TSConnection:
 
                 data.strip()
 
-                #print(data + "\n")
+                print(data + "\n")
 
                 parts = data.split()
 
@@ -131,7 +131,6 @@ class TSConnection:
                     self._recv_queue.put(("MSG", msg_from, "", msg))
                 elif command == "notifycliententerview":
                     msg_from = self.decode(args["client_nickname"])
-                    #self._client_map[args["clid"]]["client_nickname"] = msg_from
                     self._recv_queue.put(("CONNECT", msg_from, ""))
                 elif command == "notifyclientleftview":
                     msg_from = self.decode(self._client_map[args["clid"]]["client_nickname"])

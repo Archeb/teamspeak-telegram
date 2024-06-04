@@ -1,8 +1,5 @@
-from cmath import exp
-import json
 import requests
 import threading
-import time
 import traceback
 
 from queue import Queue
@@ -88,7 +85,10 @@ class TelegramConnection:
                 return
 
     def relay_message(self, user, msg):
-        self.send_text(self._chatId, user + ": " + msg)
+        if user == "":
+            self.send_text(self._chatId, msg)
+        else:
+            self.send_text(self._chatId, user + ": " + msg)
 
     def send_text(self, chatid, text):
         if not text or not self._running or not chatid:
@@ -97,6 +97,7 @@ class TelegramConnection:
         data = {
             "text": text,
             "chat_id": chatid,
+            "parse_mode": "MarkdownV2"
         }
         try:
             requests.post(self._api + "/sendMessage", data, timeout=1)

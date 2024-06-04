@@ -25,15 +25,12 @@ def build_message(event):
     elif event[TYPE] == "ACTION":
         return "* %s %s" % (event[1], event[3])
     elif event[TYPE] == "CONNECT":
-        # return "*** %s connected ***" % ( event[1], )
-        return "*** %s 进入了 TeamSpeak 服务器 ***" % (event[1], )
-    elif event[TYPE] == "MOVE":
-        # return "*** %s moved from [%s] to [%s] ***" % (event[1], event[2], event[3])
-        # return None
-        return "*** %s 从频道 [%s] 跑到了频道 [%s] ***" % (event[1], event[2], event[3])
+        return "* %s *进入了 TeamSpeak 服务器" % (event[1], )
+    # 太吵了，关掉
+    # elif event[TYPE] == "MOVE":
+    #     return "* %s 从频道 [%s] 跑到了频道 [%s] *" % (event[1], event[2], event[3])
     elif event[TYPE] == "QUIT":
-        # return "*** %s disconnected ***" % (event[1], )
-        return "*** %s 离开了 TeamSpeak 服务器 ***" % (event[1], )
+        return "* %s *离开了 TeamSpeak 服务器" % (event[1], )
     else:
         return None
 
@@ -69,7 +66,7 @@ while telegram.running() and ts.running():
             if (tm[TYPE] == "MSG"):
                 telegram.relay_message(tm[FROM], tm[TEXT])
             else:
-                telegram.relay_message("服务器消息", build_message(tm))
+                telegram.relay_message("", build_message(tm))
 
     except KeyboardInterrupt:
         telegram.disconnect()
