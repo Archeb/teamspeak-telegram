@@ -43,7 +43,7 @@ class TelegramConnection:
             update = r.json()
 
             if(update["ok"] == True):
-                # print("[Telegram] Get new update")
+                print("[Telegram] Get new update")
                 return update
             else:
                 print(update)
@@ -64,43 +64,53 @@ class TelegramConnection:
                         if "message" in update and "text" in update["message"]:
                             self._lastUpdate = update["update_id"] + 1
                             print(update)
-                            if update["message"]["text"] == "/getchatid":
+                            if update["message"]["text"][0:10] == "/getchatid":
                                 self.send_text(
                                     update["message"]["chat"]["id"],
-                                    "chat_id: " + str(update["message"]["chat"]["id"]))
-                            if update["message"]["chat"]["id"] == self._chatId:
+                                    "chat_id: " + str(update["message"]["chat"]["id"]),"")
+                            elif update["message"]["chat"]["id"] == self._chatId:
                                 if(update["message"]["text"].startswith("/ts_") or update["message"]["text"].startswith("/ts ")):
+                                    if "username" in update["message"]["from"]:
+                                        displayname = update["message"]["from"]["username"]
+                                    else:
+                                        displayname = update["message"]["from"]["first_name"]
                                     self._recv_queue.put(
-                                        ("GLOBALMSG", update["message"]["from"]["username"],
+                                        ("GLOBALMSG", displayname,
                                          "Telegram",
                                          update["message"]["text"][4:]))
                                 else:
+                                    if "username" in update["message"]["from"]:
+                                        displayname = update["message"]["from"]["username"]
+                                    else:
+                                        displayname = update["message"]["from"]["first_name"]
                                     self._recv_queue.put(
-                                        ("MSG",  update["message"]["from"]["username"],
+                                        ("MSG", displayname,
                                          "Telegram",
                                          update["message"]["text"]))
             except:
                 print("[Telegram] Error while fetching updates from Telegram API")
                 print(traceback.format_exc())
-                return
 
     def relay_message(self, user, msg):
         if user == "":
-            self.send_text(self._chatId, msg)
+            # 系统消息
+            self.send_text(self._chatId, msg, "MarkdownV2")
         else:
-            self.send_text(self._chatId, user + ": " + msg)
+            # 用户消息
+            self.send_text(self._chatId, user + ": " + msg, "")
 
-    def send_text(self, chatid, text):
+    def send_text(self, chatid, text, parse_mode="MarkdownV2"):
         if not text or not self._running or not chatid:
             return
 
         data = {
             "text": text,
             "chat_id": chatid,
-            "parse_mode": "MarkdownV2"
+            "parse_mode": parse_mode
         }
         try:
-            requests.post(self._api + "/sendMessage", data, timeout=1)
+            response = requests.post(self._api + "/sendMessage", data, timeout=1)
+            print(response.json())
         except:
             print("[Telegram] Error while sending message to Telegram API")
             print(traceback.format_exc())
