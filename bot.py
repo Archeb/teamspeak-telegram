@@ -41,27 +41,21 @@ while telegram.running() and ts.running():
         im = telegram.poll()
         tm = ts.poll()
 
-        if (im and len(im[TEXT]) > 0):
-            if(im[TYPE] == "MSG"):
-                # print(im)
+        if (im):
+            if(im[TYPE] == "MSG" and len(im[TEXT]) > 0):
+                print("(" + im[2] + ")",
+                                 "<%s> %s" % (im[FROM], im[TEXT]))
                 ts.relay_message("(" + im[2] + ")",
                                  "<%s> %s" % (im[FROM], im[TEXT]))
-            elif(im[TYPE == "GLOBALMSG"]):
-                if(im[TEXT] == "getinfo"):
-                    ts_user = ts.client_map()
-                    ts_channel = ts.channel_map()
-                    message = ""
-                    for channel in ts_channel.items():
-                        if len(channel[1]["members"]) > 0:
-                            message += "\r\n" + ts.get_channel_name_with_relation(channel[1]) + ":"
-                            for member in channel[1]["members"]:
-                                message += " [" + ts.decode(ts_user[member]["client_nickname"]) + "]"
+            elif(im[TYPE == "LISTUSER"]):
+                ts_user = ts.client_map()
+                message = "\n"
+                for user in ts_user.items():
+                    message += user[1]["client_nickname"] + "\n"
 
-                    telegram.relay_message("服务器用户", message)
-                    continue
+                telegram.relay_message("服务器用户", message)
+                continue
 
-                ts.relay_global_message(
-                    "(" + im[2] + ")", "<%s> %s" % (im[FROM], im[TEXT]))
         if tm:
             if (tm[TYPE] == "MSG"):
                 telegram.relay_message(tm[FROM], tm[TEXT])

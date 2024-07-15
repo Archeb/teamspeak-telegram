@@ -63,22 +63,13 @@ class TelegramConnection:
                     for update in newUpdate["result"]:
                         if "message" in update and "text" in update["message"]:
                             self._lastUpdate = update["update_id"] + 1
-                            print(update)
+                            # print(update)
                             if update["message"]["text"][0:10] == "/getchatid":
                                 self.send_text(
                                     update["message"]["chat"]["id"],
                                     "chat_id: " + str(update["message"]["chat"]["id"]),"")
                             elif update["message"]["chat"]["id"] == self._chatId:
-                                if(update["message"]["text"].startswith("/ts_") or update["message"]["text"].startswith("/ts ")):
-                                    if "username" in update["message"]["from"]:
-                                        displayname = update["message"]["from"]["username"]
-                                    else:
-                                        displayname = update["message"]["from"]["first_name"]
-                                    self._recv_queue.put(
-                                        ("GLOBALMSG", displayname,
-                                         "Telegram",
-                                         update["message"]["text"][4:]))
-                                else:
+                                if(update["message"]["text"].startswith("/chat")):
                                     if "username" in update["message"]["from"]:
                                         displayname = update["message"]["from"]["username"]
                                     else:
@@ -86,7 +77,9 @@ class TelegramConnection:
                                     self._recv_queue.put(
                                         ("MSG", displayname,
                                          "Telegram",
-                                         update["message"]["text"]))
+                                         update["message"]["text"][update["message"]["entities"][0]["length"]+1:]))
+                                elif(update["message"]["text"].startswith("/listuser")):
+                                    self._recv_queue.put(("LISTUSER", "", "",""))
             except:
                 print("[Telegram] Error while fetching updates from Telegram API")
                 print(traceback.format_exc())

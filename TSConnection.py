@@ -109,7 +109,7 @@ class TSConnection:
 
                 data.strip()
 
-                print(data + "\n")
+                #print(data + "\n")
 
                 parts = data.split()
 
