@@ -1,3 +1,7 @@
+# Deprecated, use the new [teamspeak-telegram-bot-ts](https://github.com/Archeb/teamspeak-telegram-bot-ts) instead
+<details>
+  <summary></summary>
+  
 # TeamSpeak-Telegram Bot
 You can use this bot to integrate TeamSpeak with Telegram. With the support of Azure Text-to-Speech broadcast.
 
@@ -20,3 +24,5 @@ Remember, Channel 1 will always be the "intercommunicating channel". To protect 
 - `/ts_getinfo` See who's in the server and which channels they're chatting on.
 - `/ts [MESSAGE]` The message followed will be broadcasted serverwide, with voice prompts.
 
+
+</details>
